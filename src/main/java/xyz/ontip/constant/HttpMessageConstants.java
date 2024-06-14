@@ -10,4 +10,7 @@ public class HttpMessageConstants implements Serializable {
     // 注册失败
     public static final int REGISTER_ERROR_CODE = 412;
     public static final String REGISTER_ERROR_MSG = "注册失败";
+    // 用户的登录信息校验失败
+    public static final int LOGIN_VERIFY_ERROR_CODE = 413;
+    public static final String LOGIN_VERIFY_ERROR_MSG = "校验失败";
 }
