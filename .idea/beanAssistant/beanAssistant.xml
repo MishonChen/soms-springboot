@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="beanAssistantConfig">
+    <option name="detailList">
+      <list>
+        <BeanAssistantDetail>
+          <option name="declareAnnotation" value="@Resource" />
+          <option name="scanAnnotation" value="org.springframework.stereotype.Service" />
+        </BeanAssistantDetail>
+        <BeanAssistantDetail>
+          <option name="declareAnnotation" value="@Resource" />
+          <option name="scanAnnotation" value="org.springframework.stereotype.Component" />
+        </BeanAssistantDetail>
+        <BeanAssistantDetail>
+          <option name="declareAnnotation" value="@Resource" />
+          <option name="scanAnnotation" value="com.alibaba.dubbo.config.annotation.Service" />
+        </BeanAssistantDetail>
+        <BeanAssistantDetail>
+          <option name="declareAnnotation" value="@Resource" />
+          <option name="scanAnnotation" value="org.apache.dubbo.config.annotation.DubboService" />
+        </BeanAssistantDetail>
+        <BeanAssistantDetail>
+          <option name="declareAnnotation" value="@Resource" />
+          <option name="scanAnnotation" value="org.apache.ibatis.annotations.Mapper" />
+        </BeanAssistantDetail>
+      </list>
+    </option>
+  </component>
+</project>
