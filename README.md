@@ -38,7 +38,6 @@ jdbc.username=root # 修改为你的用户名
 jdbc.password=123456 # 修改为你的密码
 ```
 
-项目目录结构
 
 
 部署和运行
