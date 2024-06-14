@@ -25,6 +25,7 @@ git clone https://github.com/MishonChen/soms-ssm.git
 推荐使用 Tomcat 9 及以上版本。
 
 在 IntelliJ IDEA 的运行配置中添加本地 Tomcat。
+
 3. 修改数据库配置文件
 
 编辑 src/main/resources/db.properties 文件，修改为你本地的数据库配置：
