@@ -8,10 +8,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="supermarket-order-management-system" />
+        <module name="soms-ssm" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="soms-ssm" target="17" />
       <module name="supermarket-order-management-system" target="17" />
     </bytecodeTargetLevel>
   </component>
