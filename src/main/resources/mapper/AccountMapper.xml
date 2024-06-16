@@ -3,8 +3,8 @@
 <mapper namespace="xyz.ontip.mapper.AccountMapper">
 
     <insert id="register">
-        insert into account(id,username,password,role,register_time,recommend_id)
-        values(#{id},#{username},#{password},#{role},#{registerTime},#{recommendId})
+        insert into account(id,username,password,role,register_time,recommend_id,name,address)
+        values(#{id},#{username},#{password},#{role},#{registerTime},#{recommendId},#{name},#{address})
     </insert>
 
     <select id="getAccountPassword" resultType="java.lang.String" parameterType="java.lang.String">

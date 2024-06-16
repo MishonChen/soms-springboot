@@ -1,4 +1,4 @@
-package xyz.ontip.pojo.entity;
+package xyz.ontip.pojo.vo.responesVo;
 
 import lombok.Data;
 
@@ -6,12 +6,11 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class Account implements Serializable {
+public class AccountInfoListVO  implements Serializable {
     private Long id;
     private String username;
-    private String password;
     private String role;
-    private Date registerTime;
+    private String registerTime;
     private String recommendCode;
     private Long recommendId;
     private String name;

@@ -11,6 +11,5 @@ public interface AccountMapper {
 
      Long verifyRecommendCode(String recommendCode);
 
-
      void register(Account account);
 }
