@@ -27,7 +27,7 @@ git clone https://github.com/MishonChen/soms-ssm.git
 
 2. 修改数据库配置文件
 
-编辑 src/main/resources/db.properties 文件，修改为你本地的数据库配置：
+编辑 src/main/resources/application.yaml 文件，修改为你本地的数据库配置：
 
 
 ``` properties
