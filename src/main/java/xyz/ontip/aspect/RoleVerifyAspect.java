@@ -17,13 +17,14 @@ import xyz.ontip.util.JWTUtils;
 @Component
 @Aspect
 @Slf4j
-public class UserControllerAspect {
+public class RoleVerifyAspect {
 
     @Resource
     private JWTUtils jwtUtils;
 
     @Pointcut("execution(* xyz.ontip.controller.admin.UserController.*(..))")
-    public void userControllerMethods() {}
+    public void userControllerMethods() {
+    }
 
     @Before("userControllerMethods() && args(request,..)")
     public void verifyAccountRole(HttpServletRequest request) {
@@ -38,16 +39,19 @@ public class UserControllerAspect {
         if (sessionToken != null && jwtUtils.verifyJWT(sessionToken)) {
             JWTPayload jwtPayload = jwtUtils.analysisJWT(sessionToken);
             verifyRole(jwtPayload);
+            return;
         }
 
         // 检查 Cookie 中的 token
         if (cookieToken != null && jwtUtils.verifyJWT(cookieToken)) {
             JWTPayload jwtPayload = jwtUtils.analysisJWT(cookieToken);
             verifyRole(jwtPayload);
+            return;
         }
+        throw new ForbiddenException("权限验证失败");
     }
 
-    private static  String getCookieToken(HttpServletRequest request, String sessionToken) {
+    private static String getCookieToken(HttpServletRequest request, String sessionToken) {
         String cookieToken = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -68,6 +72,7 @@ public class UserControllerAspect {
 
     private void verifyRole(JWTPayload jwtPayload) {
         Object role = jwtPayload.getClaim("role");
+        log.info("role:" + role);
         if (role instanceof String roleString) {
             if (!"admin".equals(roleString)) {
                 throw new ForbiddenException("权限验证失败");

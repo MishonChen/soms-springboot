@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import xyz.ontip.annotation.RequiresClassPermission;
+import xyz.ontip.annotation.RequiresMethodPermission;
 import xyz.ontip.constant.HttpMessageConstants;
 import xyz.ontip.pojo.ResultEntity;
 import xyz.ontip.pojo.entity.Account;

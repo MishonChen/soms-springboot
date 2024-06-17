@@ -4,10 +4,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import xyz.ontip.annotation.RequiresClassPermission;
 import xyz.ontip.controller.AccountController;
 import xyz.ontip.pojo.ResultEntity;
 import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
@@ -19,13 +17,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
+@RequiresClassPermission(value = {"admin"})
 public class UserController {
 
     @Autowired
     @Qualifier("adminUserService")
     private UserService userService;
-    @Resource
-    private AccountController accountController;
 
     @PostMapping("/account/info")
     public ResultEntity<?> getAccountInfoList(HttpServletRequest request,
@@ -37,6 +34,11 @@ public class UserController {
            throw new  RuntimeException("发生错误");
        }
 
+    }
+
+    @GetMapping("/test")
+    public ResultEntity<?> test() {
+        return ResultEntity.success("测试成功");
     }
 
 }
