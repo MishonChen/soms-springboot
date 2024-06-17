@@ -1,7 +1,7 @@
 package xyz.ontip.util;
 
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -37,7 +37,7 @@ public class TimeUtils {
      * @param day    前几天
      * @return 格式化后的时间字符串
      */
-    public @NotNull String getStringTimeByDay(String format, Integer day) {
+    public String getStringTimeByDay(String format, Integer day) {
         // 格式化日期
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         // 获取前day天的日期

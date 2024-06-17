@@ -1,0 +1,30 @@
+#开发配置
+server:
+  port: 12345
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/soms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+  #  配置时间
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Shanghai
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+# 映射器（Mapper）配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    org:
+      springframework:
+        security: info

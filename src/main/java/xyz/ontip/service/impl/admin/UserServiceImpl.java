@@ -13,7 +13,7 @@ import xyz.ontip.service.admin.UserService;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service("AdminUserMapper")
+@Service("adminUserService")
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -24,15 +24,13 @@ public class UserServiceImpl implements UserService {
         try {
             List<AccountInfoListDto> accountInfoList = userMapper.getAccountInfoList(accountInfoListParamVO);
             List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
-            for (int i = 0; i < accountInfoList.size(); i++) {
+            for (AccountInfoListDto accountInfoListDto : accountInfoList) {
                 AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
-                BeanUtils.copyProperties(accountInfoList.get(i), accountInfoListVO);
-                accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoList.get(i).getRegisterTime(), "yyyy-MM-dd"));
-                switch (accountInfoList.get(i).getRole()) {
-                    case "admin"->
-                        accountInfoListVO.setRole("管理员");
-                    default ->
-                        accountInfoListVO.setRole("普通用户");
+                BeanUtils.copyProperties(accountInfoListDto, accountInfoListVO);
+                accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoListDto.getRegisterTime(), "yyyy-MM-dd"));
+                switch (accountInfoListDto.getRole()) {
+                    case "admin" -> accountInfoListVO.setRole("管理员");
+                    default -> accountInfoListVO.setRole("普通用户");
                 }
                 accountInfoListVOS.add(accountInfoListVO);
             }

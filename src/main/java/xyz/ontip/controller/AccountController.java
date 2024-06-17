@@ -1,8 +1,14 @@
 package xyz.ontip.controller;
 
 import cn.hutool.core.lang.Snowflake;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import xyz.ontip.constant.HttpMessageConstants;
@@ -13,9 +19,7 @@ import xyz.ontip.pojo.vo.requestVo.RegisterVO;
 import xyz.ontip.service.AccountService;
 import xyz.ontip.util.JWTUtils;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+
 
 @Slf4j
 @RestController
@@ -28,7 +32,7 @@ public class AccountController {
     private AccountService accountService;
     @Autowired
     private Snowflake snowflake;
-    @Autowired
+    @Resource
     private JWTUtils jwtUtils;
 
     public final static Integer  EXPIRE_DAY = 7;
@@ -41,7 +45,7 @@ public class AccountController {
 
             if (loginVo.getRememberMe()) {
                 // 用户选择记住我，创建一个 Cookie
-                Cookie cookie = new Cookie("accountToken", jwt);
+                Cookie cookie = new Cookie("accountCookieToken", jwt);
                 log.info(cookie.getValue());
                 // 防止客户端脚本访问
                 cookie.setHttpOnly(true);
@@ -55,7 +59,7 @@ public class AccountController {
             } else {
                 // 用户没有选择记住我，保存到会话存储
                 String sessionJWT = jwtUtils.createJWT(account, 1);
-                session.setAttribute("accountToken", sessionJWT);
+                session.setAttribute("accountSessionToken", sessionJWT);
             }
             return ResultEntity.success();
         } catch (RuntimeException e) {
@@ -66,15 +70,26 @@ public class AccountController {
     }
 
     @GetMapping("/check-login")
-    public ResultEntity<?> checkLogin(HttpSession session, @CookieValue(value = "accountToken", required = false) String cookieToken) {
+    public ResultEntity<?> checkLogin(HttpServletRequest request) {
         // 获取会话中的 token
-        String sessionToken = (String) session.getAttribute("accountToken");
+        HttpSession session = request.getSession();
+        String sessionToken = (String) session.getAttribute("accountSessionToken");
 
         // 检查会话中的 token
         if (sessionToken != null && jwtUtils.verifyJWT(sessionToken)) {
             return ResultEntity.success("User is logged in");
         }
 
+        String cookieToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accountCookieToken".equals(cookie.getName())) {
+                    cookieToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
         // 检查 Cookie 中的 token
         if (cookieToken != null && jwtUtils.verifyJWT(cookieToken)) {
             return ResultEntity.success("User is logged in");
