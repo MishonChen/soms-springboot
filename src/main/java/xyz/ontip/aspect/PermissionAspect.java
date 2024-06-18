@@ -10,8 +10,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import xyz.ontip.annotation.RequiresClassPermission;
-import xyz.ontip.annotation.RequiresMethodPermission;
+import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.exception.ForbiddenException;
 import xyz.ontip.util.JWTUtils;
 
@@ -25,42 +24,22 @@ public class PermissionAspect {
     @Resource
     public JWTUtils jWTUtils;
 
-
     @Autowired
     public PermissionAspect(HttpServletRequest request) {
         this.request = request;
     }
 
 
-    @Before("@within(requiresClassPermission)")
-    public void checkClassPermission(RequiresClassPermission requiresClassPermission) {
-        if (!hasClassPermission(requiresClassPermission)) {
+    @Before("@annotation(requirePermission) || @within(requirePermission)")
+    public void checkPermission(RequirePermission requirePermission){
+        String[] permissions = requirePermission.value();
+        // 在这里执行权限检查逻辑
+        // 使用permissions进行权限检查
+        if (! hasPermission(permissions)) {
             throw new ForbiddenException("权限验证失败");// 没有权限，抛出异常
         }
     }
 
-    @Before("@annotation(requiresMethodPermission)")
-    public void checkMethodPermission(RequiresMethodPermission requiresMethodPermission) {
-        if (!hasMethodPermission(requiresMethodPermission)) {
-            throw new ForbiddenException("权限验证失败");// 没有权限，抛出异常
-        }
-    }
-
-    private boolean hasClassPermission(RequiresClassPermission requiresClassPermission) {
-        if (requiresClassPermission != null) {
-            String[] permissions = requiresClassPermission.value();
-            return hasPermission(permissions);
-        }
-        return true; // 没有类级别的权限注解，默认通过
-    }
-
-    private boolean hasMethodPermission(RequiresMethodPermission requiresMethodPermission) {
-        if (requiresMethodPermission != null) {
-            String[] permissions = requiresMethodPermission.value();
-            return hasPermission(permissions);
-        }
-        return true; // 没有方法级别的权限注解，默认通过
-    }
 
     private boolean hasPermission(String[] requiredPermissions) {
         // 如果参数为空，则不对权限进行验证

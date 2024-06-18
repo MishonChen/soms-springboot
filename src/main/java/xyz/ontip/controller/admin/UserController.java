@@ -1,12 +1,10 @@
 package xyz.ontip.controller.admin;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import xyz.ontip.annotation.RequiresClassPermission;
-import xyz.ontip.controller.AccountController;
+import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.pojo.ResultEntity;
 import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
@@ -17,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
-@RequiresClassPermission(value = {"admin"})
+@RequirePermission(value = {"admin"})
 public class UserController {
 
     @Autowired
