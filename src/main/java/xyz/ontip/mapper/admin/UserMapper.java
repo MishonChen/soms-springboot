@@ -12,4 +12,6 @@ import java.util.List;
 public interface UserMapper {
 
    List<AccountInfoListDto> getAccountInfoList(AccountInfoListParamVO accountInfoListParamVO);
+
+    List<AccountInfoListDto> getAccountInfoListAll();
 }

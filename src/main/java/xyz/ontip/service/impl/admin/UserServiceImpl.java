@@ -22,7 +22,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<AccountInfoListVO> getAccountInfoList(AccountInfoListParamVO accountInfoListParamVO) {
         try {
-            List<AccountInfoListDto> accountInfoList = userMapper.getAccountInfoList(accountInfoListParamVO);
+            List<AccountInfoListDto> accountInfoList;
+            if (accountInfoListParamVO.getPageSize() == 0 && accountInfoListParamVO.getPageSizeIndex() == 0) {
+                accountInfoList = userMapper.getAccountInfoListAll();
+            } else {
+                accountInfoList = userMapper.getAccountInfoList(accountInfoListParamVO);
+            }
             List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
             for (AccountInfoListDto accountInfoListDto : accountInfoList) {
                 AccountInfoListVO accountInfoListVO = new AccountInfoListVO();

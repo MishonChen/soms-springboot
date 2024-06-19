@@ -6,13 +6,20 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.exception.ForbiddenException;
+import xyz.ontip.single.TokenBlockListSingletonMap;
 import xyz.ontip.util.JWTUtils;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 @Aspect
 @Component
@@ -21,6 +28,8 @@ public class PermissionAspect {
 
     private final HttpServletRequest request;
 
+    @Value("${soms.block.list.token_head}")
+    private String tokenHead;
     @Resource
     public JWTUtils jWTUtils;
 
@@ -30,20 +39,34 @@ public class PermissionAspect {
     }
 
 
-    @Before("@annotation(requirePermission) || @within(requirePermission)")
-    public void checkPermission(RequirePermission requirePermission){
-        String[] permissions = requirePermission.value();
-        // 在这里执行权限检查逻辑
-        // 使用permissions进行权限检查
-        if (! hasPermission(permissions)) {
-            throw new ForbiddenException("权限验证失败");// 没有权限，抛出异常
+    @Before("@annotation(xyz.ontip.annotation.RequirePermission) || @within(xyz.ontip.annotation.RequirePermission)")
+    public void checkPermission(JoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+
+        // 获取方法级别的注解
+        RequirePermission requirePermission = method.getAnnotation(RequirePermission.class);
+
+        // 如果方法级别没有注解，获取类级别的注解
+        if (requirePermission == null) {
+            requirePermission = joinPoint.getTarget().getClass().getAnnotation(RequirePermission.class);
+        }
+
+        if (requirePermission != null) {
+            String[] permissions = requirePermission.value();
+            log.info("Checking permissions for: {}", (Object) permissions);
+            if (!hasPermission(permissions)) {
+                log.warn("Permission check failed for: {}", (Object) permissions);
+                throw new ForbiddenException("Cookie获取失败，请同意Cookie隐私政策");
+            }
+            log.info("Permission check passed for: {}", (Object) permissions);
         }
     }
 
 
     private boolean hasPermission(String[] requiredPermissions) {
         // 如果参数为空，则不对权限进行验证
-        if (requiredPermissions.length == 0){
+        if (requiredPermissions.length == 0) {
             return true;
         }
 
@@ -51,18 +74,26 @@ public class PermissionAspect {
         // 获取会话中的 token
         HttpSession session = request.getSession();
         String sessionToken = (String) session.getAttribute("accountSessionToken");
-
+        log.info("sessionToken:" + sessionToken);
         // 从 Cookie 中获取 token
         String cookieToken = getCookieToken(request, sessionToken);
+        log.info("cookieToken:" + cookieToken);
         // 检查会话中的 token
         if (sessionToken != null && jWTUtils.verifyJWT(sessionToken)) {
             JWTPayload jwtPayload = jWTUtils.analysisJWT(sessionToken);
-            return verifyRole(jwtPayload, requiredPermissions);
+            if (verifyRole(jwtPayload, requiredPermissions)) {
+                return verifyTokenBlockList(sessionToken);
+            }
+            return false;
         }
+
         // 检查 Cookie 中的 token
         if (cookieToken != null && jWTUtils.verifyJWT(cookieToken)) {
             JWTPayload jwtPayload = jWTUtils.analysisJWT(cookieToken);
-            return verifyRole(jwtPayload, requiredPermissions);
+            if (verifyRole(jwtPayload, requiredPermissions)) {
+                return verifyTokenBlockList(cookieToken);
+            }
+            return false;
         }
 
         return true; // 假设总是有权限
@@ -81,6 +112,13 @@ public class PermissionAspect {
         return false;
     }
 
+    private boolean verifyTokenBlockList(String Token) {
+        Map<String, Object> tokenMap = TokenBlockListSingletonMap.getInstance();
+        tokenMap.forEach((key, value) -> {
+            log.error("tokenPermissionMap:" + "{" + key + ":" + value + "}");
+        });
+        return tokenMap == null || tokenMap.get(tokenHead + Token) == null;
+    }
 
     private static String getCookieToken(HttpServletRequest request, String sessionToken) {
         String cookieToken = null;

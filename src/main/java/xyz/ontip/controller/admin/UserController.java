@@ -31,8 +31,8 @@ public class UserController {
        }catch (Exception e){
            throw new  RuntimeException("发生错误");
        }
-
     }
+
 
     @GetMapping("/test")
     public ResultEntity<?> test() {

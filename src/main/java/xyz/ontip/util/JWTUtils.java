@@ -1,6 +1,7 @@
 package xyz.ontip.util;
 
 import cn.hutool.jwt.*;
+import lombok.extern.slf4j.Slf4j;
 import xyz.ontip.pojo.entity.Account;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTUtil;
 
+@Slf4j
 @Component
 public class JWTUtils {
 
@@ -36,6 +38,20 @@ public class JWTUtils {
     public JWTPayload analysisJWT(String token) {
         JWT jwt = JWTUtil.parseToken(token);
         return jwt.getPayload();
+    }
+
+    public Long getId(String token) {
+        try {
+            if (token != null && !token.isEmpty()) {
+                JWTPayload jwtPayload = analysisJWT(token);
+                Object uid = jwtPayload.getClaim("uid");
+                return Long.parseLong(uid.toString());
+            }
+        } catch (RuntimeException e) {
+
+            throw new RuntimeException("JWT校验错误");
+        }
+        throw new RuntimeException("JWT校验错误");
     }
 
     public boolean verifyJWT(String token) {

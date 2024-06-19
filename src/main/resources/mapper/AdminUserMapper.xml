@@ -15,10 +15,25 @@
     </resultMap>
 
     <select id="getAccountInfoList" resultMap="getAccountInfoListMap">
-        SELECT  id,username,name,address,recommend_code,recommend_id,register_time,role
-        FROM  account
-        ORDER BY register_time DESC
+        SELECT
+            id,
+            username,
+            name,
+            address,
+            recommend_code,
+            recommend_id,
+            register_time,
+            role
+        FROM
+            account
+        ORDER BY
+            register_time DESC, id ASC
         LIMIT #{pageSize} OFFSET #{pageSizeIndex}
     </select>
 
+    <select id="getAccountInfoListAll" resultMap="getAccountInfoListMap">
+        SELECT  id,username,name,address,recommend_code,recommend_id,register_time,role
+        FROM  account
+        ORDER BY register_time DESC
+    </select>
 </mapper>

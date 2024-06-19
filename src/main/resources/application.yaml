@@ -28,3 +28,7 @@ logging:
     org:
       springframework:
         security: info
+soms:
+  block:
+    list:
+      token_head: TokenBlockList-
