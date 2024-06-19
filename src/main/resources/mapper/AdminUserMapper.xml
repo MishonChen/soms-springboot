@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="xyz.ontip.mapper.admin.UserMapper">
-
-
     <resultMap id="getAccountInfoListMap" type="xyz.ontip.pojo.dto.AccountInfoListDto">
         <id property="id" column="id"/>
         <result property="username" column="username"/>
-        <result property="name" column="name"/>
+        <result property="nickname" column="nickname"/>
         <result property="address" column="address"/>
         <result property="recommendCode" column="recommend_code"/>
         <result property="recommendId" column="recommend_id"/>
@@ -15,25 +13,58 @@
     </resultMap>
 
     <select id="getAccountInfoList" resultMap="getAccountInfoListMap">
-        SELECT
-            id,
-            username,
-            name,
-            address,
-            recommend_code,
-            recommend_id,
-            register_time,
-            role
-        FROM
-            account
-        ORDER BY
-            register_time DESC, id ASC
+        SELECT id,
+               username,
+               nickname,
+               address,
+               recommend_code,
+               recommend_id,
+               register_time,
+               role
+        FROM account
+        ORDER BY register_time DESC, id ASC
         LIMIT #{pageSize} OFFSET #{pageSizeIndex}
     </select>
 
     <select id="getAccountInfoListAll" resultMap="getAccountInfoListMap">
-        SELECT  id,username,name,address,recommend_code,recommend_id,register_time,role
-        FROM  account
+        SELECT id,
+               username,
+               nickname,
+               address,
+               recommend_code,
+               recommend_id,
+               register_time,
+               role
+        FROM account
         ORDER BY register_time DESC
     </select>
+
+    <delete id="batchDeleteUserByIds" parameterType="java.util.List">
+        DELETE FROM account
+        WHERE id IN
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="searchUserInfoList" resultMap="getAccountInfoListMap">
+        SELECT id,
+               username,
+               nickname,
+               address,
+               recommend_code,
+               recommend_id,
+               register_time,
+               role
+        FROM account
+        WHERE
+           CAST(id AS CHAR) LIKE CONCAT('%', #{SearchUserInfo.keyWords}, '%')
+           OR username LIKE CONCAT('%', #{SearchUserInfo.keyWords}, '%')
+           OR address LIKE CONCAT('%', #{SearchUserInfo.keyWords}, '%')
+           OR nickName LIKE CONCAT('%', #{SearchUserInfo.keyWords},'%')
+           OR DATE_FORMAT(register_time, '%Y-%m-%d') LIKE CONCAT('%', #{SearchUserInfo.keyWords}, '%')
+        ORDER BY register_time DESC, id ASC
+        LIMIT #{SearchUserInfo.pageSize} OFFSET #{SearchUserInfo.pageSizeIndex};
+    </select>
+
 </mapper>

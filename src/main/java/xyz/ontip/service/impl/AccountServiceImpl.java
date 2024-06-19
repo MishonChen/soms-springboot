@@ -65,6 +65,7 @@ public class AccountServiceImpl implements AccountService {
             log.warn(e.getMessage());
             throw new RuntimeException("数据插入失败");
         }
-
     }
+
+
 }

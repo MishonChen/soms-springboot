@@ -13,6 +13,6 @@ public class AccountInfoListDto implements Serializable {
     private Date registerTime;
     private String recommendCode;
     private Long recommendId;
-    private String name;
+    private String nickname;
     private String address;
 }

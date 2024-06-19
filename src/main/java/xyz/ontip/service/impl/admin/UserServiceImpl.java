@@ -1,18 +1,22 @@
 package xyz.ontip.service.impl.admin;
 
 import cn.hutool.core.date.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.ontip.mapper.admin.UserMapper;
 import xyz.ontip.pojo.dto.AccountInfoListDto;
 import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
+import xyz.ontip.pojo.vo.requestVo.SearchUserInfo;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 import xyz.ontip.service.admin.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service("adminUserService")
 public class UserServiceImpl implements UserService {
 
@@ -43,6 +47,36 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new RuntimeException("发生异常，请联系管理员");
         }
+    }
 
+    @Transactional
+    @Override
+    public void batchDeleteUserByIds(Long[] ids) {
+        try {
+            int deleteRow = userMapper.batchDeleteUserByIds(ids);
+            if (deleteRow != ids.length) {
+                throw new RuntimeException("删除错误");
+            }
+        } catch (RuntimeException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException("删除错误");
+        }
+    }
+
+    @Override
+    public List<AccountInfoListVO>  searchUserInfoList(SearchUserInfo searchUserInfo) {
+        List<AccountInfoListDto> accountInfoListDtos = userMapper.searchUserInfoList(searchUserInfo);
+        List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
+        for (AccountInfoListDto accountInfoListDto : accountInfoListDtos) {
+            AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
+            BeanUtils.copyProperties(accountInfoListDto, accountInfoListVO);
+            accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoListDto.getRegisterTime(), "yyyy-MM-dd"));
+            switch (accountInfoListDto.getRole()) {
+                case "admin" -> accountInfoListVO.setRole("管理员");
+                default -> accountInfoListVO.setRole("普通用户");
+            }
+            accountInfoListVOS.add(accountInfoListVO);
+        }
+        return accountInfoListVOS;
     }
 }

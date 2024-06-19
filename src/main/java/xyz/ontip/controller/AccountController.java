@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.constant.HttpMessageConstants;
@@ -126,6 +127,9 @@ public class AccountController {
         }
         throw new ForbiddenException("登出失败");
     }
+
+
+
 
 
     @PostMapping("/test")

@@ -29,4 +29,6 @@
         FROM account a
         WHERE a.recommend_code  = #{recommendCode} AND a.role = 'admin'
     </select>
+
+
 </mapper>
