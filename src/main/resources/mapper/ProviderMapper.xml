@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.ontip.mapper.admin.ProviderMapper">
+
+    <select id="getAllProvider" resultType="xyz.ontip.pojo.entity.Provider">
+        select id,
+               proCode,
+               proName,
+               proDesc,
+               proPhone,
+               proAddress,
+               proFax,
+               createId,
+               creationDate,
+               modifyDate,
+               modifyId
+        FROM provider
+        ORDER BY creationDate DESC, id ASC
+    </select>
+</mapper>
