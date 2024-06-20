@@ -1,4 +1,4 @@
-package xyz.ontip.pojo.vo.requestVo;
+package xyz.ontip.pojo.vo.requestVo.account;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;

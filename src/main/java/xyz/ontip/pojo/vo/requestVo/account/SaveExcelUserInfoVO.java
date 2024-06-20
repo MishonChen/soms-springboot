@@ -1,14 +1,16 @@
-package xyz.ontip.pojo.vo.requestVo;
+package xyz.ontip.pojo.vo.requestVo.account;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
-public class InsertAccountVO implements Serializable {
+public class SaveExcelUserInfoVO implements Serializable {
     private String username;
     private String role;
     private String registerTime;
+    private String recommendCode;
+    private Long recommendId;
     private String nickname;
     private String address;
 }

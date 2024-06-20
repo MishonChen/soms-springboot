@@ -17,4 +17,46 @@
         FROM provider
         ORDER BY creationDate DESC, id ASC
     </select>
+
+    <select id="getSupplierListByPage" resultType="xyz.ontip.pojo.entity.Provider">
+        select id,
+               proCode,
+               proName,
+               proDesc,
+               proPhone,
+               proAddress,
+               proFax,
+               createId,
+               proContact,
+               creationDate,
+               modifyDate,
+               modifyId
+        FROM provider
+        ORDER BY creationDate DESC, id ASC
+        LIMIT #{providerParamVO.pageSize} OFFSET #{providerParamVO.pageSizeIndex}
+    </select>
+
+    <select id="SearchSupplierList" resultType="xyz.ontip.pojo.entity.Provider">
+        select id,
+               proCode,
+               proName,
+               proDesc,
+               proPhone,
+               proAddress,
+               proFax,
+               createId,
+               proContact,
+               creationDate,
+               modifyDate,
+               modifyId
+        FROM provider
+        WHERE proAddress LIKE CONCAT('%', #{searchProviderInfo.keyWords}, '%')
+           OR proDesc LIKE CONCAT('%', #{searchProviderInfo.keyWords}, '%')
+           OR proName LIKE CONCAT('%', #{searchProviderInfo.keyWords}, '%')
+           OR proCode LIKE CONCAT('%', #{searchProviderInfo.keyWords}, '%')
+           OR proContact LIKE CONCAT('%', #{searchProviderInfo.keyWords}, '%')
+           OR DATE_FORMAT(creationDate, '%Y-%m-%d') LIKE CONCAT('%', #{searchProviderInfo.keyWords}, '%')
+        ORDER BY creationDate DESC, id ASC
+        LIMIT #{searchProviderInfo.pageSize} OFFSET #{searchProviderInfo.pageSizeIndex}
+    </select>
 </mapper>

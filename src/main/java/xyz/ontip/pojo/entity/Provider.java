@@ -17,6 +17,7 @@ public class Provider  implements Serializable {
     private String proCode;
     private String proName;
     private String proDesc;
+    private String proContact;
     private String proPhone;
     private String proAddress;
     private String proFax;

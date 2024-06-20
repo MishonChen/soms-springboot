@@ -1,4 +1,4 @@
-package xyz.ontip.pojo.vo.requestVo;
+package xyz.ontip.pojo.vo.requestVo.account;
 
 import lombok.Data;
 
