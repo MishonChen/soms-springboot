@@ -32,3 +32,6 @@ soms:
   block:
     list:
       token_head: TokenBlockList-
+  reset:
+    password:
+      default: 123456

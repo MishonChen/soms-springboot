@@ -4,12 +4,18 @@ import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.ontip.mapper.admin.UserMapper;
-import xyz.ontip.pojo.dto.AccountInfoListDto;
+import xyz.ontip.pojo.dto.AccountInfoListDTO;
+import xyz.ontip.pojo.dto.InsertAccountDTO;
+import xyz.ontip.pojo.dto.ResetPasswordDTO;
 import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
-import xyz.ontip.pojo.vo.requestVo.SearchUserInfo;
+import xyz.ontip.pojo.vo.requestVo.InsertAccountVO;
+import xyz.ontip.pojo.vo.requestVo.SearchAccountInfo;
+import xyz.ontip.pojo.vo.requestVo.UpdateAccountVO;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 import xyz.ontip.service.admin.UserService;
 
@@ -22,18 +28,22 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Value("${soms.reset.password.default}")
+    private String defaultPassword;
 
     @Override
     public List<AccountInfoListVO> getAccountInfoList(AccountInfoListParamVO accountInfoListParamVO) {
         try {
-            List<AccountInfoListDto> accountInfoList;
+            List<AccountInfoListDTO> accountInfoList;
             if (accountInfoListParamVO.getPageSize() == 0 && accountInfoListParamVO.getPageSizeIndex() == 0) {
                 accountInfoList = userMapper.getAccountInfoListAll();
             } else {
                 accountInfoList = userMapper.getAccountInfoList(accountInfoListParamVO);
             }
             List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
-            for (AccountInfoListDto accountInfoListDto : accountInfoList) {
+            for (AccountInfoListDTO accountInfoListDto : accountInfoList) {
                 AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
                 BeanUtils.copyProperties(accountInfoListDto, accountInfoListVO);
                 accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoListDto.getRegisterTime(), "yyyy-MM-dd"));
@@ -64,10 +74,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AccountInfoListVO>  searchUserInfoList(SearchUserInfo searchUserInfo) {
-        List<AccountInfoListDto> accountInfoListDtos = userMapper.searchUserInfoList(searchUserInfo);
+    public List<AccountInfoListVO> searchUserInfoList(SearchAccountInfo searchAccountInfo) {
+        List<AccountInfoListDTO> accountInfoListDTOS = userMapper.searchUserInfoList(searchAccountInfo);
         List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
-        for (AccountInfoListDto accountInfoListDto : accountInfoListDtos) {
+        for (AccountInfoListDTO accountInfoListDto : accountInfoListDTOS) {
             AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
             BeanUtils.copyProperties(accountInfoListDto, accountInfoListVO);
             accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoListDto.getRegisterTime(), "yyyy-MM-dd"));
@@ -78,5 +88,54 @@ public class UserServiceImpl implements UserService {
             accountInfoListVOS.add(accountInfoListVO);
         }
         return accountInfoListVOS;
+    }
+
+    @Override
+    public AccountInfoListVO getUserInfoById(Long uId) {
+        AccountInfoListDTO accountInfoListDto = userMapper.getUserInfoById(uId);
+        switch (accountInfoListDto.getRole()) {
+            case "admin" -> accountInfoListDto.setRole("管理员");
+            default -> accountInfoListDto.setRole("普通用户");
+        }
+        AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
+        BeanUtils.copyProperties(accountInfoListDto, accountInfoListVO);
+        accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoListDto.getRegisterTime(), "yyyy-MM-dd"));
+        return accountInfoListVO;
+    }
+
+    @Transactional
+    @Override
+    public void updateAccountInfo(UpdateAccountVO updateAccountVO) {
+        try {
+            int row = userMapper.updateAccountInfo(updateAccountVO);
+            if (row != 1) {
+                throw new RuntimeException("发生错误");
+            }
+        } catch (RuntimeException e) {
+            log.warn(e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void resetPasswordById(Long id) {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        String password = passwordEncoder.encode(defaultPassword);
+        resetPasswordDTO.setPassword(password);
+        resetPasswordDTO.setId(id);
+        int row = userMapper.resetPasswordById(resetPasswordDTO);
+        if (row != 1){
+            throw new RuntimeException("密码重置失败");
+        }
+    }
+
+    @Override
+    public void insertUser(InsertAccountDTO insertAccountDTO) {
+        insertAccountDTO.setPassword(passwordEncoder.encode(defaultPassword));
+       int row = userMapper.insertUser(insertAccountDTO);
+        if (row != 1){
+            throw new RuntimeException("插入失败");
+        }
+
     }
 }

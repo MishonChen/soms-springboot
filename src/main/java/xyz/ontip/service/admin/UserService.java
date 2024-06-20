@@ -1,8 +1,11 @@
 package xyz.ontip.service.admin;
 
 
+import xyz.ontip.pojo.dto.InsertAccountDTO;
 import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
-import xyz.ontip.pojo.vo.requestVo.SearchUserInfo;
+import xyz.ontip.pojo.vo.requestVo.InsertAccountVO;
+import xyz.ontip.pojo.vo.requestVo.SearchAccountInfo;
+import xyz.ontip.pojo.vo.requestVo.UpdateAccountVO;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 
 
@@ -13,5 +16,13 @@ public interface UserService {
     void batchDeleteUserByIds(Long[] ids);
 
 
-    List<AccountInfoListVO>  searchUserInfoList(SearchUserInfo searchUserInfo);
+    List<AccountInfoListVO>  searchUserInfoList(SearchAccountInfo searchAccountInfo);
+
+    AccountInfoListVO getUserInfoById(Long uId);
+
+    void updateAccountInfo(UpdateAccountVO updateAccountVO);
+
+    void resetPasswordById(Long id);
+
+    void insertUser(InsertAccountDTO insertAccountDTO);
 }
