@@ -1,10 +1,15 @@
 package xyz.ontip.controller.admin;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.jwt.JWTPayload;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import jakarta.annotation.Resource;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +31,9 @@ import xyz.ontip.service.admin.UserService;
 import xyz.ontip.util.JWTUtils;
 import xyz.ontip.util.ScheduledTasksUtils;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -143,11 +151,37 @@ public class UserController {
         try {
             userService.insertUser(insertAccountDTO);
             return ResultEntity.success();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn(e.getMessage());
-           return ResultEntity.serverError();
+            return ResultEntity.serverError();
         }
     }
+
+    @PostMapping("/account/export/excel")
+    public void exportExcelUserInfo(HttpServletResponse response) {
+        ExcelWriter writer = ExcelUtil.getWriter();
+        List<AccountInfoListVO> accountInfoListVOS = userService.getAllUserInfo();
+        writer.write(accountInfoListVOS, true);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+
+        // 使用URL编码处理文件名
+        String fileName = "用户信息.xlsx";
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        response.setHeader("Content-Disposition", "attachment;filename=" + encodedFileName);
+        try (ServletOutputStream out = response.getOutputStream()) {
+            writer.flush(out, true);
+        } catch (IOException e) {
+            log.warn("将用户信息导出到 Excel 时出错: {}", e.getMessage(), e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+            writer.close();
+        }
+    }
+
+
+
+
 
     @GetMapping("/test")
     public ResultEntity<?> test() {

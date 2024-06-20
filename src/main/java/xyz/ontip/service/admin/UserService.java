@@ -25,4 +25,6 @@ public interface UserService {
     void resetPasswordById(Long id);
 
     void insertUser(InsertAccountDTO insertAccountDTO);
+
+    List<AccountInfoListVO> getAllUserInfo();
 }

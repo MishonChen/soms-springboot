@@ -136,6 +136,27 @@ public class UserServiceImpl implements UserService {
         if (row != 1){
             throw new RuntimeException("插入失败");
         }
+    }
 
+    @Override
+    public List<AccountInfoListVO> getAllUserInfo() {
+        try {
+            List<AccountInfoListDTO> accountInfoList;
+                accountInfoList = userMapper.getAccountInfoListAll();
+            List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
+            for (AccountInfoListDTO accountInfoListDto : accountInfoList) {
+                AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
+                BeanUtils.copyProperties(accountInfoListDto, accountInfoListVO);
+                accountInfoListVO.setRegisterTime(DateUtil.format(accountInfoListDto.getRegisterTime(), "yyyy-MM-dd"));
+                switch (accountInfoListDto.getRole()) {
+                    case "admin" -> accountInfoListVO.setRole("管理员");
+                    default -> accountInfoListVO.setRole("普通用户");
+                }
+                accountInfoListVOS.add(accountInfoListVO);
+            }
+            return accountInfoListVOS;
+        } catch (Exception e) {
+            throw new RuntimeException("发生异常，请联系管理员");
+        }
     }
 }
