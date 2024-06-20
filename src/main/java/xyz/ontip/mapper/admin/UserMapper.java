@@ -6,10 +6,12 @@ import org.springframework.stereotype.Repository;
 import xyz.ontip.pojo.dto.AccountInfoListDTO;
 import xyz.ontip.pojo.dto.InsertAccountDTO;
 import xyz.ontip.pojo.dto.ResetPasswordDTO;
+import xyz.ontip.pojo.dto.SaveExcelUserInfoDTO;
 import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
 import xyz.ontip.pojo.vo.requestVo.SearchAccountInfo;
 import xyz.ontip.pojo.vo.requestVo.UpdateAccountVO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mapper
@@ -31,4 +33,6 @@ public interface UserMapper {
     int resetPasswordById(ResetPasswordDTO resetPasswordDTO);
 
     int insertUser(@Param("insertAccountDTO") InsertAccountDTO insertAccountDTO);
+
+    int batchSaveUser(@Param("saveExcelUserInfoDTOS") List<SaveExcelUserInfoDTO> saveExcelUserInfoDTOS);
 }

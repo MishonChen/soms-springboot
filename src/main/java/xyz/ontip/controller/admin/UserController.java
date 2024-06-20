@@ -1,8 +1,10 @@
 package xyz.ontip.controller.admin;
 
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.jwt.JWTPayload;
+import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import jakarta.annotation.Resource;
@@ -17,24 +19,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.constant.HttpMessageConstants;
 import xyz.ontip.exception.ForbiddenException;
 import xyz.ontip.pojo.ResultEntity;
 import xyz.ontip.pojo.dto.InsertAccountDTO;
-import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
-import xyz.ontip.pojo.vo.requestVo.InsertAccountVO;
-import xyz.ontip.pojo.vo.requestVo.SearchAccountInfo;
-import xyz.ontip.pojo.vo.requestVo.UpdateAccountVO;
+import xyz.ontip.pojo.dto.SaveExcelUserInfoDTO;
+import xyz.ontip.pojo.vo.requestVo.*;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 import xyz.ontip.service.admin.UserService;
 import xyz.ontip.util.JWTUtils;
 import xyz.ontip.util.ScheduledTasksUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -179,8 +182,19 @@ public class UserController {
         }
     }
 
-
-
+    @PostMapping("/account/save/excel")
+    public ResultEntity<?> saveExcelUserInfo(@RequestParam("file") MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream()) {
+            ExcelReader reader = ExcelUtil.getReader(inputStream);
+            List<SaveExcelUserInfoVO> maps = reader.readAll(SaveExcelUserInfoVO.class);
+            userService.batchSaveUser(maps);
+            return ResultEntity.success();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            return ResultEntity.serverError();
+        }
+    }
 
 
     @GetMapping("/test")

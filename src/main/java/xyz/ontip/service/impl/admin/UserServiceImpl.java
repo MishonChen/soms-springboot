@@ -1,6 +1,8 @@
 package xyz.ontip.service.impl.admin;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Snowflake;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,8 @@ import xyz.ontip.mapper.admin.UserMapper;
 import xyz.ontip.pojo.dto.AccountInfoListDTO;
 import xyz.ontip.pojo.dto.InsertAccountDTO;
 import xyz.ontip.pojo.dto.ResetPasswordDTO;
-import xyz.ontip.pojo.vo.requestVo.AccountInfoListParamVO;
-import xyz.ontip.pojo.vo.requestVo.InsertAccountVO;
-import xyz.ontip.pojo.vo.requestVo.SearchAccountInfo;
-import xyz.ontip.pojo.vo.requestVo.UpdateAccountVO;
+import xyz.ontip.pojo.dto.SaveExcelUserInfoDTO;
+import xyz.ontip.pojo.vo.requestVo.*;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 import xyz.ontip.service.admin.UserService;
 
@@ -32,6 +32,8 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     @Value("${soms.reset.password.default}")
     private String defaultPassword;
+    @Resource
+    private Snowflake snowflake;
 
     @Override
     public List<AccountInfoListVO> getAccountInfoList(AccountInfoListParamVO accountInfoListParamVO) {
@@ -124,7 +126,7 @@ public class UserServiceImpl implements UserService {
         resetPasswordDTO.setPassword(password);
         resetPasswordDTO.setId(id);
         int row = userMapper.resetPasswordById(resetPasswordDTO);
-        if (row != 1){
+        if (row != 1) {
             throw new RuntimeException("密码重置失败");
         }
     }
@@ -132,8 +134,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void insertUser(InsertAccountDTO insertAccountDTO) {
         insertAccountDTO.setPassword(passwordEncoder.encode(defaultPassword));
-       int row = userMapper.insertUser(insertAccountDTO);
-        if (row != 1){
+        int row = userMapper.insertUser(insertAccountDTO);
+        if (row != 1) {
             throw new RuntimeException("插入失败");
         }
     }
@@ -142,7 +144,7 @@ public class UserServiceImpl implements UserService {
     public List<AccountInfoListVO> getAllUserInfo() {
         try {
             List<AccountInfoListDTO> accountInfoList;
-                accountInfoList = userMapper.getAccountInfoListAll();
+            accountInfoList = userMapper.getAccountInfoListAll();
             List<AccountInfoListVO> accountInfoListVOS = new ArrayList<>();
             for (AccountInfoListDTO accountInfoListDto : accountInfoList) {
                 AccountInfoListVO accountInfoListVO = new AccountInfoListVO();
@@ -159,4 +161,32 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("发生异常，请联系管理员");
         }
     }
+
+
+    @Transactional
+    @Override
+    public void batchSaveUser(List<SaveExcelUserInfoVO> maps) {
+        List<SaveExcelUserInfoDTO> saveExcelUserInfoDTOS = new ArrayList<>();
+
+        // 遍历原始列表并拷贝每个对象的属性
+        for (SaveExcelUserInfoVO vo : maps) {
+            SaveExcelUserInfoDTO dto = new SaveExcelUserInfoDTO();
+            BeanUtils.copyProperties(vo, dto);
+            dto.setId(snowflake.nextId());
+            dto.setPassword(passwordEncoder.encode(defaultPassword));
+            saveExcelUserInfoDTOS.add(dto);
+        }
+
+        try {
+            // 批量保存到数据库
+            int row = userMapper.batchSaveUser(saveExcelUserInfoDTOS);
+            if (row != saveExcelUserInfoDTOS.size()) {
+                throw new RuntimeException("数据导入失败，预期插入" + saveExcelUserInfoDTOS.size() + "条，但实际插入" + row + "条");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("批量插入失败：" + e.getMessage(), e);
+        }
+    }
+
+
 }

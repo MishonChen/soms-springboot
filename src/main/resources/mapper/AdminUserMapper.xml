@@ -113,4 +113,20 @@
                 #{insertAccountDTO.nickname,jdbcType=VARCHAR},
                 #{insertAccountDTO.address,jdbcType=VARCHAR})
     </insert>
+
+    <insert id="batchSaveUser">
+        insert into account(id, username, password, role, register_time, recommend_id, nickname, address)
+        values
+        <foreach collection="saveExcelUserInfoDTOS" item="item" separator=",">
+            (#{item.id, jdbcType=BIGINT},
+            #{item.username, jdbcType=VARCHAR},
+            #{item.password, jdbcType=VARCHAR},
+            #{item.role, jdbcType=VARCHAR},
+            #{item.registerTime, jdbcType=VARCHAR},
+            #{item.recommendId, jdbcType=BIGINT},
+            #{item.nickname, jdbcType=VARCHAR},
+            #{item.address, jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
 </mapper>
