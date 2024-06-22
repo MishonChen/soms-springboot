@@ -30,5 +30,15 @@
         WHERE a.recommend_code  = #{recommendCode} AND a.role = 'admin'
     </select>
 
+    <update id="updatePassword">
+        UPDATE account
+        SET password = #{newPassword}
+        WHERE id = #{id}
+    </update>
 
+    <select id="getPasswordById" resultType="String">
+        select password
+        from account
+        where id = #{id}
+    </select>
 </mapper>

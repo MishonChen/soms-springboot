@@ -20,7 +20,7 @@ import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.constant.HttpMessageConstants;
 import xyz.ontip.exception.ForbiddenException;
 import xyz.ontip.pojo.ResultEntity;
-import xyz.ontip.pojo.dto.InsertAccountDTO;
+import xyz.ontip.pojo.dto.account.InsertAccountDTO;
 import xyz.ontip.pojo.vo.requestVo.account.*;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 import xyz.ontip.service.admin.UserService;
@@ -96,6 +96,18 @@ public class UserController {
             return ResultEntity.success(accountInfoListVO);
         } catch (NumberFormatException e) {
             log.warn("类型转换异常");
+            return ResultEntity.failure(HttpMessageConstants.PARAM_VERIFY_ERROR_CODE,
+                    HttpMessageConstants.PARAM_VERIFY_ERROR_MSG);
+        }
+    }
+
+
+    @PostMapping("/account/basic/info")
+    public ResultEntity<?> getAccountInfo(){
+        try {
+            AccountInfoListVO accountInfoListVO = userService.getUserInfo();
+            return ResultEntity.success(accountInfoListVO);
+        } catch (RuntimeException e) {
             return ResultEntity.failure(HttpMessageConstants.PARAM_VERIFY_ERROR_CODE,
                     HttpMessageConstants.PARAM_VERIFY_ERROR_MSG);
         }

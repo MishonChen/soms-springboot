@@ -1,6 +1,9 @@
 #开发配置
 server:
   port: 12345
+  servlet:
+    session:
+      timeout: 1d
 spring:
   http:
     encoding:
@@ -31,9 +34,9 @@ mybatis:
 
 logging:
   level:
-    org:
-      springframework:
-        security: info
+    root: INFO
+    org.springframework: DEBUG
+    org.mybatis: DEBUG
 soms:
   block:
     list:
@@ -41,3 +44,5 @@ soms:
   reset:
     password:
       default: 123456
+
+

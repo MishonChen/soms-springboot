@@ -22,4 +22,9 @@ public class HttpMessageConstants implements Serializable {
     // 删除用户错误
     public static final int DElETE_USER_ERROR_CODE = 414;
     public static final String DELETE_USER_ERROR_MSG = "删除用户错误";
+    // 重设密码错误
+    public static final int RESET_PASSWORD_ERROR_CODE = 415;
+    public static final String RESET_PASSWORD_ERROR_MSG = "重设密码错误";
+
+
 }

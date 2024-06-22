@@ -1,4 +1,4 @@
-package xyz.ontip.pojo.dto;
+package xyz.ontip.pojo.dto.account;
 
 import lombok.Data;
 

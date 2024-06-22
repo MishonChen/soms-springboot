@@ -1,11 +1,12 @@
-package xyz.ontip.pojo.vo.requestVo.provider;
+package xyz.ontip.pojo.dto.my;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
-public class SearchProviderInfo implements Serializable {
+public class MySearchBillDTO implements Serializable {
+    private Long id;
     private String keyWords;
     private Integer pageSize;
     private Integer pageSizeIndex;

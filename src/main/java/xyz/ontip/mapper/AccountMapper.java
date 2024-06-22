@@ -1,6 +1,7 @@
 package xyz.ontip.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import xyz.ontip.pojo.dto.account.UpdatePasswordDTO;
 import xyz.ontip.pojo.entity.Account;
 
 @Mapper
@@ -14,4 +15,7 @@ public interface AccountMapper {
      void register(Account account);
 
 
+    int updatePassword(UpdatePasswordDTO updatePasswordDTO);
+
+    String getPasswordById(Long id);
 }

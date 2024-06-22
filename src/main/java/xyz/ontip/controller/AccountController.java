@@ -21,6 +21,7 @@ import xyz.ontip.pojo.ResultEntity;
 import xyz.ontip.pojo.entity.Account;
 import xyz.ontip.pojo.vo.requestVo.LoginVO;
 import xyz.ontip.pojo.vo.requestVo.RegisterVO;
+import xyz.ontip.pojo.vo.requestVo.account.ResetPasswordVO;
 import xyz.ontip.service.AccountService;
 import xyz.ontip.single.TokenBlockListSingletonList;
 import xyz.ontip.single.TokenBlockListSingletonMap;
@@ -72,6 +73,7 @@ public class AccountController {
                 // 用户没有选择记住我，保存到会话存储
                 String sessionJWT = jwtUtils.createJWT(account, 1);
                 session.setAttribute("accountSessionToken", sessionJWT);
+                log.info("Setting session with JWT: {}", sessionJWT);
             }
             return ResultEntity.success();
         } catch (RuntimeException e) {
@@ -81,10 +83,10 @@ public class AccountController {
         }
     }
 
-    @RequirePermission(value = {"admin","user"})
+    @RequirePermission(value = {"admin", "user"})
     @GetMapping("/check-login")
     public ResultEntity<?> checkLogin() {
-      return ResultEntity.success();
+        return ResultEntity.success();
     }
 
 
@@ -101,7 +103,7 @@ public class AccountController {
 
     @PostMapping("/logout")
     @RequirePermission({"user", "admin"})
-    public ResultEntity<?> logout(HttpServletRequest request,HttpServletResponse response) {
+    public ResultEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
 
         // 获取会话中的 token
         HttpSession session = request.getSession();
@@ -129,13 +131,9 @@ public class AccountController {
     }
 
 
-
-
-
-    @PostMapping("/test")
+    @GetMapping("/test")
     public ResultEntity<?> test() {
-
-        return ResultEntity.success(passwordEncoder.encode("123456") + "-sn:" + snowflake.nextId());
+        return ResultEntity.success("测试接口正常,服务启动成功。");
     }
 
 
@@ -158,18 +156,58 @@ public class AccountController {
 
 
     private void addTokenBlockList(String Token) {
-        if (Token == null){
+        if (Token == null) {
             return;
         }
         Map<String, Object> tokenMap = TokenBlockListSingletonMap.getInstance();
         List<Object> tokenList = TokenBlockListSingletonList.getInstance();
         // 获取id
-        if (tokenMap!= null && tokenMap.get(tokenHead + Token) == null) {
+        if (tokenMap != null && tokenMap.get(tokenHead + Token) == null) {
             Long id = jwtUtils.getId(Token);
             tokenMap.put(tokenHead + Token, id);
             tokenList.add(tokenHead + Token);
-        }else {
+        } else {
             throw new ForbiddenException("该用户已被注销，请重新登录");
+        }
+    }
+
+    @RequirePermission(value = {"user", "admin"})
+    @PostMapping("/reset/password")
+    public ResultEntity<?> resetPassword(HttpServletRequest request,
+                                         HttpServletResponse response,
+                                         @RequestBody ResetPasswordVO resetPasswordVO) {
+        try {
+            if (!resetPasswordVO.getNewPassword().equals(resetPasswordVO.getConfirmPassword())) {
+                return ResultEntity.failure(HttpMessageConstants.RESET_PASSWORD_ERROR_CODE,
+                        HttpMessageConstants.RESET_PASSWORD_ERROR_MSG);
+            }
+            accountService.resetPassword(resetPasswordVO);
+            // 获取会话中的 token
+            HttpSession session = request.getSession();
+            String sessionToken = (String) session.getAttribute("accountSessionToken");
+
+            // 从 Cookie 中获取 token
+            String cookieToken = getCookieToken(request, sessionToken);
+            // 检查会话中的 token
+            if (sessionToken != null) {
+                session.removeAttribute("accountSessionToken");
+                return ResultEntity.success();
+            }
+            // 检查 Cookie 中的 token
+            if (cookieToken != null) {
+                addTokenBlockList(cookieToken);
+                // 删除 cookie
+                Cookie cookie = new Cookie("accountCookieToken", null);
+                cookie.setPath("/");
+                cookie.setHttpOnly(true);
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+                return ResultEntity.success();
+            }
+            return ResultEntity.success();
+        } catch (Exception e) {
+            return ResultEntity.failure(HttpMessageConstants.RESET_PASSWORD_ERROR_CODE,
+                    HttpMessageConstants.RESET_PASSWORD_ERROR_MSG);
         }
     }
 

@@ -1,7 +1,7 @@
 package xyz.ontip.service.admin;
 
 
-import xyz.ontip.pojo.dto.InsertAccountDTO;
+import xyz.ontip.pojo.dto.account.InsertAccountDTO;
 import xyz.ontip.pojo.vo.requestVo.account.AccountInfoListParamVO;
 import xyz.ontip.pojo.vo.requestVo.account.SaveExcelUserInfoVO;
 import xyz.ontip.pojo.vo.requestVo.account.SearchAccountInfo;
@@ -28,4 +28,6 @@ public interface UserService {
     List<AccountInfoListVO> getAllUserInfo();
 
     void batchSaveUser(List<SaveExcelUserInfoVO> maps);
+
+    AccountInfoListVO getUserInfo();
 }

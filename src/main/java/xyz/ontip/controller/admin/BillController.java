@@ -5,17 +5,26 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ontip.annotation.RequirePermission;
 import xyz.ontip.pojo.ResultEntity;
+import xyz.ontip.pojo.dto.bill.BillDTO;
+import xyz.ontip.pojo.dto.bill.ProviderMapDTO;
+import xyz.ontip.pojo.entity.Bill;
 import xyz.ontip.pojo.entity.Provider;
+import xyz.ontip.pojo.vo.requestVo.bill.BillPageVO;
+import xyz.ontip.pojo.vo.requestVo.bill.InsertBillVO;
+import xyz.ontip.pojo.vo.requestVo.bill.SearchBillVO;
+import xyz.ontip.pojo.vo.requestVo.bill.UpdateBillVO;
 import xyz.ontip.pojo.vo.requestVo.provider.InsertSupplierVO;
-import xyz.ontip.pojo.vo.requestVo.provider.ProviderParamVO;
-import xyz.ontip.pojo.vo.requestVo.provider.SearchProviderVO;
-import xyz.ontip.pojo.vo.requestVo.provider.UpdateSupplierVO;
+import xyz.ontip.pojo.vo.responesVo.bill.BillVO;
+import xyz.ontip.service.admin.BillService;
 import xyz.ontip.service.admin.ProviderService;
 
 import java.io.IOException;
@@ -26,65 +35,56 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@RequestMapping("/api/bill")
 @RequirePermission(value = {"admin"})
-@RequestMapping("/api/admin/provider")
-public class ProviderController {
+public class BillController {
 
-
+    @Resource
+    private BillService billService;
     @Resource
     private ProviderService providerService;
 
 
     @PostMapping("/info/all")
-    public ResultEntity<?> getProviderInfoList() {
+    public ResultEntity<?> getBillInfoList() {
         try {
-            List<Provider> providers = providerService.getAllProvider();
+            List<Bill> providers = billService.getAllBill();
             return ResultEntity.success(providers);
         } catch (RuntimeException e) {
             return ResultEntity.serverError();
         }
-    }
-
-    @GetMapping("/info/{id}")
-    public ResultEntity<?> getSupplierInfoById(@PathVariable Long id) {
-        Provider provider = providerService.getSupplierInfoById(id);
-        return ResultEntity.success(provider);
     }
 
     @PostMapping("/info/page")
-    public ResultEntity<?> getSupplierListByPage(@RequestBody ProviderParamVO providerParamVO) {
+    public ResultEntity<?> getBillListByPage(@RequestBody BillPageVO billPageVO) {
         try {
-            List<Provider> providers = providerService.getSupplierListByPage(providerParamVO);
+            List<BillVO> providers = billService.getBillListByPage(billPageVO);
             return ResultEntity.success(providers);
         } catch (RuntimeException e) {
             return ResultEntity.serverError();
         }
     }
 
-    @PostMapping("/search/info")
-    public ResultEntity<?> SearchSupplierList(@RequestBody SearchProviderVO searchProviderVO) {
-        try {
-            List<Provider> providers = providerService.SearchSupplierList(searchProviderVO);
-            return ResultEntity.success(providers);
-        } catch (RuntimeException e) {
-            return ResultEntity.serverError();
-        }
+    @PostMapping("/info/{id}")
+    public ResultEntity<?> getBillInfoById(@PathVariable Long id) {
+        BillDTO billVO = billService.getBillInfoById(id);
+        return ResultEntity.success(billVO);
     }
 
-    @PostMapping("/insert")
-    public ResultEntity<?> insertSupplier(@RequestBody InsertSupplierVO insertSupplierVO) {
+    @PostMapping("/delete/batch")
+    public ResultEntity<?> batchDeleteBill(@RequestBody Long[] ids) {
         try {
-            providerService.insertSupplier(insertSupplierVO);
+            billService.batchDeleteBill(ids);
             return ResultEntity.success();
         } catch (RuntimeException e) {
             return ResultEntity.serverError();
         }
     }
 
-    @PostMapping("/delete")
-    public ResultEntity<?> deleteSupplier(@RequestBody Long[] pIds) {
+    @PostMapping("/insert")
+    public ResultEntity<?> insertBill(@RequestBody InsertBillVO insertBillVO) {
         try {
-            providerService.deleteSupplier(pIds);
+            billService.insertBill(insertBillVO);
             return ResultEntity.success();
         } catch (RuntimeException e) {
             return ResultEntity.serverError();
@@ -92,25 +92,41 @@ public class ProviderController {
     }
 
     @PostMapping("/update")
-    public ResultEntity<?> updateSupplier(@RequestBody UpdateSupplierVO updateSupplierVO) {
+    public ResultEntity<?> updateBill(@RequestBody UpdateBillVO updateBillVO) {
         try {
-            providerService.updateSupplier(updateSupplierVO);
+            billService.updateBill(updateBillVO);
             return ResultEntity.success();
         } catch (RuntimeException e) {
             return ResultEntity.serverError();
         }
     }
 
+    @PostMapping("/search")
+    public ResultEntity<?> searchBill(@RequestBody SearchBillVO searchBillVO) {
+        try {
+            List<BillVO> billVOS = billService.searchBill(searchBillVO);
+            return ResultEntity.success(billVOS);
+        } catch (RuntimeException e) {
+            return ResultEntity.serverError();
+        }
+    }
+
+    @PostMapping("/provider/map")
+    public ResultEntity<?> getProviderMap() {
+        List<ProviderMapDTO> providerMapDTOS = providerService.getProviderMap();
+        return ResultEntity.success(providerMapDTOS);
+    }
+
     @PostMapping("/export/excel")
     public void exportExcelUserInfo(HttpServletResponse response) {
         ExcelWriter writer = ExcelUtil.getWriter();
-        List<Provider> providers = providerService.getAllProvider();
-        writer.write(providers, true);
+        List<Bill> allBill = billService.getAllBill();
+        writer.write(allBill, true);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
 
         // 使用URL编码处理文件名
-        String fileName = "供应商信息.xlsx";
+        String fileName = "订单信息.xlsx";
         String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
         response.setHeader("Content-Disposition", "attachment;filename=" + encodedFileName);
         try (ServletOutputStream out = response.getOutputStream()) {
@@ -127,8 +143,8 @@ public class ProviderController {
     public ResultEntity<?> saveExcelUserInfo(@RequestParam("file") MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) {
             ExcelReader reader = ExcelUtil.getReader(inputStream);
-            List<InsertSupplierVO> maps = reader.readAll(InsertSupplierVO.class);
-            providerService.batchInsertSupplier(maps);
+            List<InsertBillVO> maps = reader.readAll(InsertBillVO.class);
+            billService.batchInsertBill(maps);
             return ResultEntity.success();
         } catch (IOException e) {
             throw new RuntimeException(e);

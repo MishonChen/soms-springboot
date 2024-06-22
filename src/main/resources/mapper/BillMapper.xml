@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.ontip.mapper.admin.BillMapper">
+
+    <select id="getAllBill" resultType="xyz.ontip.pojo.entity.Bill">
+        SELECT id,
+               billCode,
+               productName,
+               productDesc,
+               productUnit,
+               productCount,
+               totalPrice,
+               isPayment,
+               createdBy,
+               creationDate,
+               modifyBy,
+               modifyDate,
+               providerId
+        FROM bill
+        ORDER BY creationDate DESC, id ASC
+    </select>
+
+    <select id="getBillListByPage" resultType="xyz.ontip.pojo.dto.bill.BillDTO">
+        SELECT
+            b.id,
+            b.billCode,
+            b.productName,
+            b.productDesc,
+            b.productUnit,
+            b.productCount,
+            b.totalPrice,
+            b.isPayment,
+            a.nickname,
+            b.creationDate,
+            b.modifyBy,
+            b.modifyDate,
+            p.proName
+        FROM
+            bill b
+                join provider p on b.providerId = p.id
+                join account a  on b.createdBy  = a.id
+        ORDER BY b.creationDate DESC, p.id ASC
+        LIMIT #{pageSize} OFFSET #{pageSizeIndex}
+    </select>
+
+    <select id="getBillInfoById" resultType="xyz.ontip.pojo.dto.bill.BillDTO">
+        SELECT
+            b.id,
+            b.billCode,
+            b.productName,
+            b.productDesc,
+            b.productUnit,
+            b.productCount,
+            b.totalPrice,
+            b.isPayment,
+            a.nickname,
+            b.creationDate,
+            b.modifyBy,
+            b.modifyDate,
+            p.proName
+        FROM
+            bill b
+                join provider p on b.providerId = p.id
+                join account a  on b.createdBy  = a.id
+            WHERE b.id = #{id}
+        ORDER BY b.creationDate DESC, p.id ASC
+    </select>
+
+    <delete id="batchDeleteBill">
+        delete from bill
+        <where>
+            id IN
+            <foreach collection="ids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+
+    <insert id="insertBill">
+        insert into bill(id,
+                         billCode,
+                         productName,
+                         productDesc,
+                         productUnit,
+                         productCount,
+                         totalPrice,
+                         isPayment,
+                         createdBy,
+                         creationDate,
+                         modifyBy,
+                         modifyDate,
+                         providerId)
+        values (#{id},
+                #{billCode},
+                #{productName},
+                #{productDesc},
+                #{productUnit},
+                #{productCount},
+                #{totalPrice},
+                #{isPayment},
+                #{createdBy},
+                #{creationDate},
+                #{modifyBy},
+                #{modifyDate},
+                #{providerId})
+    </insert>
+
+    <update id="updateBill">
+        UPDATE bill
+        <set>
+            <if test="billCode != null">billCode = #{billCode},</if>
+            <if test="productName != null">productName = #{productName},</if>
+            <if test="productDesc != null">productDesc = #{productDesc},</if>
+            <if test="productUnit != null">productUnit = #{productUnit},</if>
+            <if test="productCount != null">productCount = #{productCount},</if>
+            <if test="totalPrice != null">totalPrice = #{totalPrice},</if>
+            <if test="isPayment != null">isPayment = #{isPayment},</if>
+            <if test="modifyDate != null">modifyDate = #{modifyDate},</if>
+            <if test="providerId != null">providerId = #{providerId}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="searchBill" resultType="xyz.ontip.pojo.dto.bill.BillDTO">
+        SELECT b.id,
+               b.billCode,
+               b.productName,
+               b.productDesc,
+               b.productUnit,
+               b.productCount,
+               b.totalPrice,
+               b.isPayment,
+               a.nickname,
+               b.creationDate,
+               b.modifyBy,
+               b.modifyDate,
+               p.proName
+        FROM bill b
+                 join provider p on b.providerId = p.id
+                 join account a on b.createdBy = a.id
+        WHERE b.billCode LIKE CONCAT('%', #{keyWords}, '%')
+           OR b.productName LIKE CONCAT('%', #{keyWords}, '%')
+           OR b.productUnit LIKE CONCAT('%', #{keyWords}, '%')
+           OR b.productDesc LIKE CONCAT('%', #{keyWords}, '%')
+           OR b.isPayment LIKE CONCAT('%', #{keyWords}, '%')
+           OR a.nickname LIKE CONCAT('%', #{keyWords}, '%')
+           OR DATE_FORMAT(b.creationDate, '%Y-%m-%d') LIKE CONCAT('%', #{keyWords}, '%')
+        ORDER BY b.creationDate DESC, p.id ASC
+        LIMIT #{pageSize} OFFSET #{pageSizeIndex}
+    </select>
+
+    <insert id="batchInsertBill">
+        insert into bill(
+        billCode,
+        productName,
+        productDesc,
+        productUnit,
+        productCount,
+        totalPrice,
+        isPayment,
+        createdBy,
+        creationDate,
+        modifyBy,
+        modifyDate,
+        providerId)
+        values
+        <foreach collection="saveExcel" item="item" separator=",">
+            (
+            #{item.billCode},
+            #{item.productName},
+            #{item.productDesc},
+            #{item.productUnit},
+            #{item.productCount},
+            #{item.totalPrice},
+            #{item.isPayment},
+            #{item.createdBy},
+            #{item.creationDate},
+            #{item.modifyBy},
+            #{item.modifyDate},
+            #{item.providerId}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

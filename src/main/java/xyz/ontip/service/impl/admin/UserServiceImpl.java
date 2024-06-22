@@ -11,16 +11,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.ontip.mapper.admin.UserMapper;
-import xyz.ontip.pojo.dto.AccountInfoListDTO;
-import xyz.ontip.pojo.dto.InsertAccountDTO;
-import xyz.ontip.pojo.dto.ResetPasswordDTO;
-import xyz.ontip.pojo.dto.SaveExcelUserInfoDTO;
+import xyz.ontip.pojo.dto.user.AccountInfoListDTO;
+import xyz.ontip.pojo.dto.account.InsertAccountDTO;
+import xyz.ontip.pojo.dto.account.ResetPasswordDTO;
+import xyz.ontip.pojo.dto.user.SaveExcelUserInfoDTO;
 import xyz.ontip.pojo.vo.requestVo.account.AccountInfoListParamVO;
 import xyz.ontip.pojo.vo.requestVo.account.SaveExcelUserInfoVO;
 import xyz.ontip.pojo.vo.requestVo.account.SearchAccountInfo;
 import xyz.ontip.pojo.vo.requestVo.account.UpdateAccountVO;
 import xyz.ontip.pojo.vo.responesVo.AccountInfoListVO;
 import xyz.ontip.service.admin.UserService;
+import xyz.ontip.util.JWTUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,9 @@ public class UserServiceImpl implements UserService {
     private String defaultPassword;
     @Resource
     private Snowflake snowflake;
+    @Resource
+    private JWTUtils jWTUtils ;
+
 
     @Override
     public List<AccountInfoListVO> getAccountInfoList(AccountInfoListParamVO accountInfoListParamVO) {
@@ -165,6 +169,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public AccountInfoListVO getUserInfo() {
+        return getUserInfoById(jWTUtils.getId());
+    }
 
     @Transactional
     @Override
