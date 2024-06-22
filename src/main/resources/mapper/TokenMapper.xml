@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.ontip.mapper.token.TokenMapper">
+
+    <insert id="batchInsertToken">
+        insert into token_block( token )
+        values
+        <foreach collection="tokens" item="item" separator=",">
+            ( #{item})
+        </foreach>
+    </insert>
+
+    <delete id="batchDeleteToken">
+        delete from token_block
+        <where>
+            token IN
+            <foreach collection="tokens" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+</mapper>

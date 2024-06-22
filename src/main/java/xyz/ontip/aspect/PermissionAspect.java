@@ -114,9 +114,6 @@ public class PermissionAspect {
 
     private boolean verifyTokenBlockList(String Token) {
         Map<String, Object> tokenMap = TokenBlockListSingletonMap.getInstance();
-        tokenMap.forEach((key, value) -> {
-            log.error("tokenPermissionMap:" + "{" + key + ":" + value + "}");
-        });
         return tokenMap == null || tokenMap.get(tokenHead + Token) == null;
     }
 

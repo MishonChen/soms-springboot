@@ -23,10 +23,12 @@ import xyz.ontip.pojo.vo.requestVo.LoginVO;
 import xyz.ontip.pojo.vo.requestVo.RegisterVO;
 import xyz.ontip.pojo.vo.requestVo.account.ResetPasswordVO;
 import xyz.ontip.service.AccountService;
+import xyz.ontip.service.token.TokenService;
 import xyz.ontip.single.TokenBlockListSingletonList;
 import xyz.ontip.single.TokenBlockListSingletonMap;
 import xyz.ontip.util.JWTUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +49,8 @@ public class AccountController {
     private Snowflake snowflake;
     @Resource
     private JWTUtils jwtUtils;
+    @Resource
+    private TokenService tokenService;
 
     public final static Integer EXPIRE_DAY = 7;
 
@@ -125,7 +129,14 @@ public class AccountController {
             cookie.setHttpOnly(true);
             cookie.setMaxAge(0);
             response.addCookie(cookie);
-            return ResultEntity.success();
+            List<String> stringList = new ArrayList<>();
+            stringList.add(cookieToken);
+            try {
+                tokenService.batchInsertToken(stringList);
+                return ResultEntity.success();
+            } catch (Exception e) {
+                return ResultEntity.serverError();
+            }
         }
         throw new ForbiddenException("登出失败");
     }
@@ -202,7 +213,14 @@ public class AccountController {
                 cookie.setHttpOnly(true);
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
-                return ResultEntity.success();
+                List<String> stringList = new ArrayList<>();
+                stringList.add(cookieToken);
+                try {
+                    tokenService.batchInsertToken(stringList);
+                    return ResultEntity.success();
+                } catch (Exception e) {
+                    return ResultEntity.serverError();
+                }
             }
             return ResultEntity.success();
         } catch (Exception e) {

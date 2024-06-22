@@ -35,7 +35,7 @@ mybatis:
 logging:
   level:
     root: INFO
-    org.springframework: DEBUG
+    org.springframework: INFO
     org.mybatis: DEBUG
 soms:
   block:
